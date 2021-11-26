@@ -2,6 +2,8 @@
 from PySimpleGUI import PySimpleGUI as sg
 import sys
 import pandas as pd
+import pyperclip
+import time
 
 # Layout
 # definindo o tema que será usado em nosso Layout
@@ -9,9 +11,9 @@ sg.theme('Reddit')
 
 if len(sys.argv) == 1:
     fname = sg.Window('Escolher tabela',
-                      [[sg.Text('Localizar tabela')],
-                       [sg.In(), sg.FileBrowse()],
-                       [sg.Open(), sg.Cancel()]]).read(close=True)[1][0]
+    [[sg.Text('Localizar tabela')],
+    [sg.In(), sg.FileBrowse('Escolher Arquivo')],
+    [sg.Open('Abrir'), sg.Cancel('Cancelar')]]).read(close=True)[1][0]
 
 else:
     fname = sys.argv[1]
@@ -26,19 +28,20 @@ lista = []
 for i in range(0, qtde_linhas):
     evento = []
     evento.append(planilha["Índice"][i])
-    evento.append(planilha["Horário Divulgação"][i])
-    evento.append(planilha["Nome"][i])
-    evento.append(planilha["Cargo"][i])
-    evento.append(planilha["Horário"][i])
-    evento.append(planilha["Telefone"][i])
+    evento.append(planilha["Horário de Divulgação"][i])
+    evento.append(planilha["Nome fonte"][i])
+    evento.append(planilha["Cargo fonte"][i])
+    evento.append(planilha["Horário de atendimento à imprensa"][i])
+    evento.append(planilha["Telefone fonte"][i])
     evento.append(planilha["Skype"][i])
-    evento.append(planilha["Tel Assessoria"][i])
+    evento.append(planilha["Mensagem"][i])
     lista.append(evento)
 
 conteudo = ''
 
 for i in lista:
-    dentro = ''
+    campo_skype = ''
+    campo_mensagem = ''
     indice = str(i[0])
     horario_divulgacao = str(i[1])
     nome = str(i[2])
@@ -46,10 +49,18 @@ for i in lista:
     horario = str(i[4])
     telefone = str(i[5])
     skype = str(i[6])
-    tel_assessoria = str(i[7])
+    mensagem = str(i[7])
 
     if skype != 'nan':
-        dentro += f"""<span face="Arial, sans-serif" color="#5b5c5f" style="margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; line-height: 16px; vertical-align: baseline;"><strong>Skype:&nbsp;</strong>{skype}</span><br></span><strong style="color: #73bfe8; font-family: Arial, sans-serif; font-size: 12px;">As entrevistas via Skype devem ser agendadas com a assessoria de imprensa pelo n&uacute;mero {tel_assessoria}.</strong>"""
+        campo_skype += f"""<span face="Arial, sans-serif" color="#5b5c5f" style="margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; line-height: 16px; vertical-align: baseline;"><strong>Skype:&nbsp;</strong>{skype}</span><br></span>"""
+    if mensagem != 'nan':
+        campo_mensagem += f"""<strong style="color: #73bfe8; font-family: Arial, sans-serif; font-size: 12px;">{mensagem}</strong>"""
+
+
+
+
+
+
 
     conteudo += f"""<table width="600" height="228" border="0" cellpadding="0" cellspacing="0" align="center" bgcolor="#ffffff">
 <tbody>
@@ -67,7 +78,7 @@ for i in lista:
 <tr>
 <td height="10" style="width: 97.6875px;"></td>
 <td style="width: 29.75px;"><img src="http://www.fgv.br/mailing/2021/ibre/novos_templates/aviso_de_pauta/imagens/icone_relogiov2.png" width="auto" height="auto" alt="Hor&aacute;rio" style="display: block; border: 0;"></td>
-<td style="width: 364.844px;"><span face="Arial, sans-serif" color="#5b5c5f" style="text-align: left; line-height: 24px; font-size: 15px; color: #5b5c5f; font-family: Arial, sans-serif;">Divulga&ccedil;&atilde;o &agrave;s <strong>{horario_divulgacao}h</strong>&nbsp;no Portal IBRE.</span></td>
+<td style="width: 364.844px;"><span face="Arial, sans-serif" color="#5b5c5f" style="text-align: left; line-height: 24px; font-size: 15px; color: #5b5c5f; font-family: Arial, sans-serif;">Divulga&ccedil;&atilde;o &agrave;s <strong>{horario_divulgacao}</strong>&nbsp;no Portal IBRE.</span></td>
 <td style="width: 97.7188px;"></td>
 </tr>
 <tr>
@@ -89,12 +100,13 @@ for i in lista:
 <p>
     <span face="Arial, sans-serif" color="#5b5c5f" style="text-align: left; line-height: 16px; font-size: 12px; color: #5b5c5f; font-family: Arial, sans-serif;"><strong>{nome}</strong>, {cargo}</span> 
     <br> 
-    <span face="Arial, sans-serif" color="#5b5c5f" style="text-align: left; line-height: 16px; font-size: 12px; color: #5b5c5f; font-family: Arial, sans-serif;"><strong>Hor&aacute;rio:</strong>&nbsp;a partir das {horario}h</span>
+    <span face="Arial, sans-serif" color="#5b5c5f" style="text-align: left; line-height: 16px; font-size: 12px; color: #5b5c5f; font-family: Arial, sans-serif;"><strong>Hor&aacute;rio:</strong>&nbsp;a partir das {horario}</span>
     <br>
     <span face="Arial, sans-serif" color="#5b5c5f" style="margin: 0px; padding: 0px; border: 0px; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-stretch: inherit; font-size: 12px; line-height: 16px; font-family: Arial, sans-serif; vertical-align: baseline; color: #5b5c5f;"><span face="Arial, sans-serif" color="#5b5c5f" style="margin: 0px; padding: 0px; border: 0px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; line-height: 16px; vertical-align: baseline;"><strong>Telefone:&nbsp;</strong>{telefone}</span>
     <br style="color: #000000; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 14px;">
 
-    {dentro}
+    {campo_skype}
+    {campo_mensagem}
 </p>
 </td>
 <td style="width: 95.7812px;"></td>
@@ -110,9 +122,9 @@ for i in lista:
 # criando um layou com 4 linhas
 layout = [
     [sg.Text('Mês'), sg.Input(key='mes', size=(20, 1))],
-    [sg.Text('Cabeçalho'), sg.Input(key='cabecalho', size=(20, 10))],
-    [sg.Button('Converter')],
-    [sg.Text('Saída:'), sg.Text(size=(20, 4), key='-OUTPUT-')],
+    [sg.Text('Cabeçalho'), sg.Multiline(size=(30, 5),key='cabecalho')],
+    [sg.Button('Copiar conteúdo')],
+    #[sg.Text('Saída:'), sg.Text(size=(20, 4), key='-OUTPUT-')],
 ]
 
 # Janela
@@ -123,9 +135,46 @@ while True:
     eventos, valores = janela.read()
     if eventos == sg.WINDOW_CLOSED:
         break
-    if eventos == 'Converter':
+    if eventos == 'Copiar conteúdo':
         mes = str(valores['mes'])
         cabecalho = str(valores['cabecalho'])
+
+        new = cabecalho.split()
+
+        dias = []
+        for i in range(1, 32):
+            dias.append(str(i))
+
+        meses = ['janeiro,',
+                 'fevereiro,',
+                 'março,',
+                 'abril,',
+                 'maio,',
+                 'junho,',
+                 'julho,',
+                 'outubro,',
+                 'novembro,',
+                 'dezembro,', ]
+
+        nova = []
+        for palavra in new:
+            if (palavra in (dias)) | (palavra in (meses)):
+                if palavra in (dias):
+                    print('Encontramos um número', palavra)
+                    nova.append('<strong>' + palavra)
+
+                if palavra.lower() in (meses):
+                    print('Encontramos um mês', palavra)
+                    nova.append(palavra + '</strong>')
+            else:
+                nova.append(palavra)
+
+        frase_nova = ''
+
+        for i in nova:
+            frase_nova += i + ' '
+
+
 
         resposta = f"""<!DOCTYPE html>
 <html>
@@ -172,7 +221,7 @@ while True:
 </tr>
 <tr>
 <td width="50"></td>
-<td width="500"><span face="Arial, sans-serif" color="#5b5c5f" style="text-align: left; line-height: 21px; font-size: 15px; color: #5b5c5f; font-family: Arial, sans-serif;">{cabecalho}</span></td>
+<td width="500"><span face="Arial, sans-serif" color="#5b5c5f" style="text-align: left; line-height: 21px; font-size: 15px; color: #5b5c5f; font-family: Arial, sans-serif;">{frase_nova}</span></td>
 <td width="50"></td>
 </tr>
 <tr>
@@ -247,7 +296,7 @@ while True:
 </body>
 </html>
 """
-    print(resposta)
+
     # limpando o arquivo
     open('montado.txt', 'w').close()
 
@@ -255,5 +304,16 @@ while True:
     with open('montado.txt', 'a', encoding="utf-8") as arquivo:
         print(resposta, file=arquivo)
 
-    valores['-IN-'] = fname + 'montado.txt'
-    janela['-OUTPUT-'].update(valores['-IN-'])
+    # limpando o arquivo
+    open('montado.html', 'w').close()
+
+    # criando o arquivo, que receberá append(adições)
+    with open('montado.html', 'a', encoding="utf-8") as arquivo:
+        print(resposta, file=arquivo)
+
+    pyperclip.copy(resposta)
+    janela.close()
+
+    #valores['-IN-'] = 'Conteúdo copiado para a área de transferência!'
+    #janela['-OUTPUT-'].update(valores['-IN-'])
+    #time.sleep(30)
